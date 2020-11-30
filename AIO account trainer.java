@@ -46,93 +46,106 @@ public class AIOaccounttrainer extends AbstractScript {
     } //Exit code
 
 
-    void combatTask() { // Done.
+    void combatTask() { // Fix farmer door to add cooking first 15 lvls.
         if (!taskType) { // Intial message. Alleged to reduce banrate.
-                Keyboard.type("I'm in the mood for some killin'");
-                taskType = true;
+            Keyboard.type("I'm in the mood for some killin'");
+            taskType = true;
+        }
+        Tile chickenGateTile = new Tile(3236, 3295, 0); // Defining tiles and NPCs for later use.
+        Tile chickenTile = new Tile(3231, 3295, 0);
+        NPC chickenNPC = NPCs.closest("Chicken");
+        Tile frogTile = new Tile(3200, 3180, 0);
+        NPC frogNPC = NPCs.closest("Big Frog");
+        Area chickenArea = new Area(3237, 3286, 3224, 3303);
+        GameObject chickenGate = GameObjects.closest(1560);
+
+        if (combatWeight < 40) {
+            log("Looped");
+            while (!chickenArea.contains(Players.localPlayer())) { // ensuring player is in the right area.
+                log("Walking...");
+                Walking.walkExact(chickenTile);
+                sleep(1000);
             }
-            Tile chickenGateTile = new Tile(3236, 3295, 0); // Defining tiles and NPCs for later use.
-            Tile chickenTile = new Tile(3231, 3295, 0);
-            NPC chickenNPC = NPCs.closest("Chicken");
-            Tile frogTile = new Tile(3200, 3180, 0);
-            NPC frogNPC = NPCs.closest("Giant Frog");
-            Area chickenArea = new Area(3237, 3286, 3224, 3303);
-            GameObject chickenGate = GameObjects.closest(1560);
 
-            if (combatWeight < 50) {
-                log("Looped");
-                while (!chickenArea.contains(Players.localPlayer())) { // ensuring player is in the right area.
-                    log("Walking...");
-                    Walking.walkExact(chickenTile);
-                    sleep(1000);
-                    }
+            if (chickenGate.exists() && chickenGateTile.distance() < 5 && chickenArea.contains(chickenGate)) {
+                chickenGate.interact();
+                sleep(5000);
+                log("Gate Opened.");
+            }
+            if (!chickenNPC.isInCombat()) {
+                sleep(Calculations.random(800, 900));// Attack block
+                chickenNPC.interact("Attack");
+                log("Attacked.");
+                sleep(2500, 3500);
+            }
 
+            while (Players.localPlayer().isInCombat()) { // Method to ensure player doesn't cancel actions.
+                log("In combat.");
+                sleep(Calculations.random(200, 400));
+            }
+
+            while (Inventory.count("Bones") > Calculations.random(0, 4) && !Players.localPlayer().isInCombat()) { // Bone bury method.
+                log("Burying..");
+                Inventory.interact("Bones", "Bury");
+
+                sleep(Calculations.random(1200, 1400));
+                bonesBuriedTotal++;
+            }
+
+
+            while (Inventory.count(1944) > 0 || Inventory.count(2138) > 0) { // Drop any misclick pickups.
+                log("Dropping Misclicks...");
+                Inventory.dropAll(2140, 2144, 2138, 1944, 1351);
+            }
+
+            if (GroundItems.closest(314, 526).exists() && !Players.localPlayer().isInCombat() && Inventory.getEmptySlots() > 1) { // Checks to see if feather/bones exist, then picks. The exist checks are to prevent errors.
+                sleep(Calculations.random(1800, 1900));
                 if (chickenGate.exists() && chickenGateTile.distance() < 5 && chickenArea.contains(chickenGate)) {
                     chickenGate.interact();
                     sleep(5000);
                     log("Gate Opened.");
                 }
-
-                sleep(Calculations.random(800, 900));// Attack block
-                chickenNPC.interact("Attack");
-                log("Attacked.");
-                sleep(2500, 3500);
-
-                while (Players.localPlayer().isInCombat()) { // Method to ensure player doesn't cancel actions.
-                    log("In combat.");
-                    sleep(Calculations.random(200, 400));
+                log("Collected feather.");
+                if (GroundItems.closest(314).exists()) {
+                    GroundItems.closest(314).interact("Take");
                 }
-
-                while (Inventory.count("Bones") > Calculations.random(0, 4) && !Players.localPlayer().isInCombat() ) { // Bone bury method.
-                    log("Burying..");
-                    Inventory.interact("Bones", "Bury");
-                    sleep(Calculations.random(1200, 1400));
-                    bonesBuriedTotal++;
-                }
-
-                while (GroundItems.closest(314).exists() && !Players.localPlayer().isInCombat() && Inventory.getEmptySlots() > 1) { // Checks to see if feather/bones exist, then picks. The exist checks are to prevent errors.
-                    sleep(Calculations.random(1800, 1900));
-                    log("Collected feather.");
-                    if (GroundItems.closest(314).exists()) {
-                        GroundItems.closest(314).interact("Take");
-                    }
-                    sleep(1500);
-                    if (GroundItems.closest(526).exists()) {
-                        GroundItems.closest(526).interact("Take");
-                    }
-                }
-
-            }
-            if (combatWeight > 50) {
-                if (!Map.isTileOnMap(frogTile)) { // Same as above.
-                    Walking.walk(3200, 3180, 0);
-                }
-
-                sleep(Calculations.random(1500, 2500)); // Delays to allow for game processing time.
-                frogNPC.interact("Attack");
-
-                while (Players.localPlayer().isInCombat()) {
-                    sleep(Calculations.random(1000, 2000));
-                }
-
-                sleep(Calculations.random(1500, 2500)); // Delays to allow for game processing time.
-
-                if (GroundItems.closest("Big Bones").exists() && !Players.localPlayer().isInCombat()) {
-                    GroundItems.closest("Big Bones").interact("Take");
-                }
-
-                sleep(Calculations.random(2500, 3500)); // Delays to allow for game processing time.
-
-                while (Inventory.count("Big Bones") > Calculations.random(0, 4) && !Players.localPlayer().isInCombat()) {
-                    Inventory.interact("Big Bones", "Bury");
-                }
-
-                while (Inventory.count("Raw Chicken") > 1 || Inventory.count("Egg") > 1) { // Drop any misclick pickups.
-                Inventory.dropAll("Egg");
-                Inventory.dropAll("Raw Chicken");
+                sleep(1500);
+                if (GroundItems.closest(526).exists()) {
+                    GroundItems.closest(526).interact("Take");
                 }
             }
-        } //Done
+
+        }
+        if (combatWeight > 40) {
+            while (!Map.isTileOnMap(frogTile)) { // Same as above.
+                Walking.walk(3200, 3180, 0);
+            }
+            log(Players.localPlayer().getHealthPercent());
+            while (Players.localPlayer().getHealthPercent() < 40 && !Players.localPlayer().isInCombat()) {
+                sleep(Calculations.random(800, 1200));
+            }
+            while (Inventory.count("Bones") > Calculations.random(0, 4) && !Players.localPlayer().isInCombat()) { // Bone bury method.
+                log("Burying..");
+                Inventory.interact("Bones", "Bury");
+                sleep(Calculations.random(1200, 1400));
+                bonesBuriedTotal++;
+            }
+
+            if (GroundItems.closest(526).exists() && !Players.localPlayer().isInCombat()) {
+                GroundItems.closest(526).interact("Take");
+            }
+        }
+
+            sleep(Calculations.random(1500, 2500)); // Delays to allow for game processing time.
+            frogNPC.interact("Attack");
+
+            while (Players.localPlayer().isInCombat()) {
+                sleep(Calculations.random(1000, 2000));
+            }
+            sleep(1600);
+
+
+        }//Done
 
     void magicTask() {
     }
@@ -143,101 +156,114 @@ public class AIOaccounttrainer extends AbstractScript {
     void smithTask() { //TODO
 
     }
+
     void craftTask() { // TODO
 
     }
+
     void questTask() { // TODO
 
     }
-    void woodcutTask() { // TODO - Write axe selection. Make sure fm level is adequate
+
+    void woodcutTask() {
         if (!taskType) {
             Keyboard.type("Man, that was a long one. Let's relax with some lumberjacking.");
             taskType = true;
         }
         Tile wood = new Tile(3142, 3256, 0); // Area and object def
         Tile willow = new Tile(3142, 3256, 0);
-        GameObject fire = GameObjects.closest("Fire");
+
+        Tile fireput2 = new Tile(3152, 3245, 0);
+        GameObject fire = GameObjects.closest(26185);
         int wcLvlCase = Skills.getRealLevel(Skill.WOODCUTTING); // Assigning skill to var to ensure adequate num gathering.
 
         if (wcLvlCase < 30) {
-            while (Players.localPlayer().distance(wood) > 20) { // Ensures player is in correct location. Currently bugged.
+            while (Players.localPlayer().distance(wood) > 10) { // Ensures player is in correct location.
                 log(Players.localPlayer().distance(wood));
                 Walking.walk(wood);
             }
-
-            if (GroundItems.closest("Logs").exists()) {
-                GroundItems.closest("Logs").interact("Light");
-                while (Players.localPlayer().isAnimating()) { // Waits until the animation for woodcutting is completed.
-                    sleep(1800, 1900);
-                }
-                log("Lit log");
-                sleep(1000);
+            if (Inventory.getEmptySlots() > 1) {
+                GameObjects.closest(1278, 1276).interact(); // Interacts with the nearest tree.
+                sleep(2000);
             }
-
-            sleep(2000);
-            GameObjects.closest(1278, 1276).interact(); // Interacts with the nearest tree.
-
             while (Players.localPlayer().isAnimating()) { // Waits until the animation for woodcutting is completed.
                 sleep(1800, 1900);
             }
 
             while (Inventory.count("Logs") > 0) { // Lights the logs until there is none left.
-                sleep(1000);
-                Inventory.get("Tinderbox").useOn("Logs");
-                if (Players.localPlayer().distance(fire) < 1) {
-                    Walking.walk(wood);
+                Tile fireput1 = new Tile(Calculations.random(3143, 3146), Calculations.random(3253, 3256), 0);
+                if (Players.localPlayer().getSurroundingArea(5).contains(GameObjects.closest("Fire"))) {
+                    sleep(3000);
+                    Walking.walk(fireput1);
                 }
+                sleep(2000);
+                Inventory.get("Tinderbox").useOn("Logs");
+                sleep(3000);
+                while (Players.localPlayer().isAnimating()) { // Waits until the animation for woodcutting is completed.
+                    sleep(1800, 1900);
+                }
+
             }
         }
 
-         if (wcLvlCase > 30) {
-             while (Players.localPlayer().distance(wood) > 20) { // Same as above.
-                 Walking.walk(wood);
-             }
-             sleep(2000);
-             GameObjects.closest(10820).interact(); //Interacts with Oak tree.
+        if (wcLvlCase > 30) {
+            while (Players.localPlayer().distance(wood) > 10) { // Same as above.
+                Walking.walk(wood);
+                sleep(3000);
+            }
+            if (Players.localPlayer().distance(fire) < 1) {
+                sleep(3000);
+                Walking.walk(wood);
+            }
+            sleep(2000);
+            GameObjects.closest(10820).interact(); //Interacts with Oak tree.
 
-             while (Players.localPlayer().isAnimating()) {
-                 sleep(2800, 2900);
-             }
+            while (Players.localPlayer().isAnimating()) {
+                sleep(2800, 2900);
+            }
 
-             while (GroundItems.closest("Oak Logs").exists()) {
-                 GroundItems.closest("Oak Logs").interact("Light");
-                 log("Lit log");
-             }
+            while (GroundItems.closest("Oak Logs").exists()) {
+                GroundItems.closest("Oak Logs").interact("Light");
+                log("Lit log");
+            }
 
-             while (Inventory.count("Oak Logs") > 0 && Skills.getRealLevel(Skill.FIREMAKING) < 15) { // Same as above.
-                 sleep(1000);
-                 Inventory.get("Tinderbox").useOn("Oak Logs");
-             }
+            while (Inventory.count("Oak Logs") > 0 && Skills.getRealLevel(Skill.FIREMAKING) < 15) { // Same as above.
+                sleep(1000);
+                Inventory.get("Tinderbox").useOn("Oak Logs");
+            }
 
-             while (Inventory.count("Oak Logs") > 0 && Skills.getRealLevel(Skill.FIREMAKING) > 15) { // If unable to light logs due to low fm level, drop instead.
-                 sleep(1000);
-                 Inventory.dropAll("Oak logs");
-             }
-         }
+            while (Inventory.count("Oak Logs") > 0 && Skills.getRealLevel(Skill.FIREMAKING) > 15) { // If unable to light logs due to low fm level, drop instead.
+                sleep(1000);
+                Inventory.dropAll("Oak logs");
+            }
+        }
 
-         if (wcLvlCase > 60) { // Same as above.
-             while (Players.localPlayer().distance(willow) > 20) {
-                 Walking.walkExact(willow);
-             }
-             sleep(2000);
-             GameObjects.closest(10833, 10819).interact();
-             while (Players.localPlayer().isAnimating()) {
-                 sleep(1800, 1900);
-             }
-             while (Inventory.count("Willow Logs") > 0 && Skills.getRealLevel(Skill.FIREMAKING) < 30) {
-                 sleep(1000);
-                 Inventory.get("Tinderbox").useOn("Willow Logs");
-             }
-             while (Inventory.count("Willow Logs") > 0 && Skills.getRealLevel(Skill.FIREMAKING) > 30) {
-                 sleep(1000);
-                 Inventory.dropAll("Willow logs");
-             }
-         }
-    }
+        if (wcLvlCase > 60) { // Same as above.
+            while (Players.localPlayer().distance(willow) > 10) {
+                Walking.walkExact(willow);
+                sleep(3000);
+            }
+            if (Players.localPlayer().distance(fire) < 1) {
+                sleep(3000);
+                Walking.walk(willow);
+            }
+            sleep(2000);
+            GameObjects.closest(10833, 10819).interact();
+            while (Players.localPlayer().isAnimating()) {
+                sleep(1800, 1900);
+            }
+            while (Inventory.count("Willow Logs") > 0 && Skills.getRealLevel(Skill.FIREMAKING) < 30) {
+                sleep(1000);
+                Inventory.get("Tinderbox").useOn("Willow Logs");
+            }
+            while (Inventory.count("Willow Logs") > 0 && Skills.getRealLevel(Skill.FIREMAKING) > 30) {
+                sleep(1000);
+                Inventory.dropAll("Willow logs");
+            }
+        }
+    } // Done
 
-    void miningTask() { // TODO - Write pickaxe selection.
+    void miningTask() {
 
         if (!taskType) {
             Keyboard.type("Time for some digging!");
@@ -246,13 +272,7 @@ public class AIOaccounttrainer extends AbstractScript {
         String currentPickaxe = ""; // Decs.
         int miningLvlCase = Skills.getRealLevel(Skill.MINING);
 
-        if (Inventory.count(currentPickaxe) > 1) { // Under construction. Will withdraw current best pickaxe from bank.
-            Bank.open();
-            Bank.withdraw(currentPickaxe);
-            Bank.close();
-        }
-
-        if (miningLvlCase < 40 ) {
+        if (miningLvlCase < 30) {
             Tile copperMine = new Tile(3227, 3148, 0); // Decs.
             while (!Map.isTileOnMap(copperMine)) { // Move to mine location.
                 log(Map.exactDistance(copperMine));
@@ -267,7 +287,7 @@ public class AIOaccounttrainer extends AbstractScript {
                 sleep(Calculations.random(1200, 3050));
             }
 
-            while (Inventory.count("Copper Ore") > Calculations.random(0,7)) { // Drops copper ore.
+            while (Inventory.count("Copper Ore") > Calculations.random(0, 7)) { // Drops copper ore.
                 log("Dropping");
                 sleep(Calculations.random(1000, 2300));
                 Inventory.dropAll("Copper ore");
@@ -275,25 +295,24 @@ public class AIOaccounttrainer extends AbstractScript {
             }
         }
 
-        if (miningLvlCase > 40 ) { // Same as above, replace copper with iron. Still under construction.
-            Tile ironMine = new Tile(3227, 3148, 0);
+        if (miningLvlCase >= 30) { // Same as above, replace copper with iron.
+            Tile ironMine = new Tile(3402, 3169, 0);
             if (!Map.isTileOnMap(ironMine)) {
                 log(Map.exactDistance(ironMine));
-                Walking.walk(3227, 3147, 0);
+                Walking.walkExact(ironMine);
             }
-            GameObject ironOre = GameObjects.closest("Iron Rock");
+            GameObject ironOre = GameObjects.closest(11365, 11364);
             ironOre.interact("Mine");
-            while (Players.localPlayer().isAnimating())  {
+            while (Players.localPlayer().isAnimating()) {
                 sleep(Calculations.random(1200, 3050));
             }
-            while (Inventory.count("Iron Ore") > Calculations.random(0,7)) {
+            while (Inventory.count("Iron Ore") > Calculations.random(0, 7)) {
                 log("Dropping");
                 sleep(Calculations.random(1000, 2300));
                 Inventory.dropAll("Iron ore");
             }
         }
-    } // Doneish
-
+    } // Done
 
     void fishTask() {
         if (combatWeight < 30) { // Due to aggressive NPCs, if player is not high level enough go and level them up.
@@ -351,36 +370,14 @@ public class AIOaccounttrainer extends AbstractScript {
             while (Players.localPlayer().isAnimating()) {
                 sleep(Calculations.random(1800, 2200));
             }
-            while (Inventory.count(335) > Calculations.random(0, 2) || Inventory.count(331) > Calculations.random(0, 2)) {
-                sleep(Calculations.random(400, 600));
-                Inventory.dropAll(335);
-                Inventory.dropAll(331);
+            if (Skills.getRealLevel(Skill.COOKING) < 15) {
+                while (Inventory.count(335) > Calculations.random(0, 2) || Inventory.count(331) > Calculations.random(0, 2)) {
+                    sleep(Calculations.random(400, 600));
+                    Inventory.dropAll(335);
+                    Inventory.dropAll(331);
+                }
             }
-
-        }
-    }// Done
-
-    void cookTask() { // under construction.
-        if (!taskType) {
-            Keyboard.type("Time to cook up a tasty feast!");
-            taskType = true;
-        }
-        int cookLvlCase = Skills.getRealLevel(Skill.COOKING);
-
-        if (cookLvlCase < 15) {
-
-            Tile cowTile = new Tile(3208, 3292, 0);// Tile and NPC decs
-            NPC cowNPC = NPCs.closest("Cow");
-
-            if (!Map.isTileOnMap(cowTile) && Inventory.getEmptySlots() < 2) { // Location checks.
-                Walking.walk(cowTile);
-            }
-
-            while (Players.localPlayer().isInCombat()) { // Ensures task is not cancelled.
-                sleep(400, 500);
-            }
-
-            while (Inventory.getEmptySlots() < 2) { // Function that lights a fire after cutting a log, cooks the meat and then drops. Under construct.
+            if (Skills.getRealLevel(Skill.COOKING) >= 15) {
                 GameObject cookTree = GameObjects.closest("Tree");
                 GameObject cookFire = GameObjects.closest("Fire");
                 Tile cookTile = new Tile(3188, 3286, 0);
@@ -390,7 +387,6 @@ public class AIOaccounttrainer extends AbstractScript {
                 while (Players.localPlayer().isAnimating()) {
                     sleep(500);
                 }
-                Walking.walkExact(cookTile);
                 sleep(1200);
                 Inventory.get("Tinderbox").useOn("Logs");
                 sleep(3000);
@@ -398,7 +394,7 @@ public class AIOaccounttrainer extends AbstractScript {
                     sleep(500);
                 }
                 sleep(3000);
-                Inventory.get("Raw Beef").useOn(cookFire);
+                Inventory.get("Raw Trout").useOn(cookFire);
                 sleep(3000);
                 while (Players.localPlayer().isAnimating()) {
                     sleep(500);
@@ -406,28 +402,12 @@ public class AIOaccounttrainer extends AbstractScript {
                 sleep(5000);
                 Widgets.getWidgetChild(270, 14).interact();
                 sleep(5000);
-                while (Players.localPlayer().isAnimating() || Inventory.count("Raw beef") > 0 && cookFire.exists()) {
+                while (Players.localPlayer().isAnimating() || Inventory.count("Raw Trout") > 0 && cookFire.exists()) {
                     sleep(500);
                 }
             }
-
-            sleep(3000);
-            cowNPC.interact(); // Attacks cow for meat.
-
-            if (GroundItems.closest(2132).exists() && !Players.localPlayer().isInCombat()) { // Collects beef on ground.
-                sleep(Calculations.random(1800, 1900));
-                log("Collected beef.");
-                GroundItems.closest(2132).interact("Take");
-                sleep(1500);
-            }
-            while (Inventory.count(2142) > 0) {
-                Inventory.dropAll(2142);
-            }
-            while (Inventory.count(2146) > 0) {
-                Inventory.dropAll(2146);
-            }
         }
-    }
+    } // Done
 
     /*public void onPaint (Graphics g) { Waiting for the rest of the tasks to be done.
         int copperMinedTotal = 10 + Calculations.random(1, 2);
