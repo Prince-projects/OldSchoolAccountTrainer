@@ -37,6 +37,7 @@ public class AIOaccounttrainer extends AbstractScript {
     public double combatWeight = prayerLevel / 2 + (hpLevel + defLevel) / 4 + (strLevel + attLevel * 0.325) / 2; // Calculating the rough combat level of the player.
     int bonesBuriedTotal = 0; // Tracker variables for onPaint
     int fishcaughtTotal = 0;
+    String currentTask = "";
 
     public void onStart() { // Run on start
     }
@@ -47,6 +48,7 @@ public class AIOaccounttrainer extends AbstractScript {
 
 
     void combatTask() { // Fix farmer door to add cooking first 15 lvls.
+        currentTask = "Combat";
         if (!taskType) { // Intial message. Alleged to reduce banrate.
             Keyboard.type("I'm in the mood for some killin'");
             taskType = true;
@@ -145,12 +147,40 @@ public class AIOaccounttrainer extends AbstractScript {
             sleep(1600);
 
 
-        }//Done
+        }//Done (Add cooking)
 
     void magicTask() {
+        if (Inventory.count("Arrows") < 10) {
+            breakReq = true;
+        }
+        Tile goblinMage = new Tile(3251, 3226, 0);
+        NPC goblinNPC = NPCs.closest("Goblin");
+        while (!Map.isTileOnMap(goblinMage)) { // Same as above.
+            Walking.walkExact(goblinMage);
+        }
+        if (goblinNPC.exists() && !goblinNPC.isInCombat()) {
+            goblinNPC.interact("Attack");
+            while (Players.localPlayer().isInCombat()) {
+                sleep(Calculations.random(1000, 2000));
+            }
+        }
     }
 
     void rangeTask() {
+        if (Inventory.count("Arrows") < 10) {
+            breakReq = true;
+        }
+        Tile goblinRange = new Tile(3251, 3226, 0);
+        NPC goblinNPC = NPCs.closest("Goblin");
+        while (!Map.isTileOnMap(goblinRange)) { // Same as above.
+            Walking.walkExact(goblinRange);
+        }
+        if (goblinNPC.exists() && !goblinNPC.isInCombat()) {
+            goblinNPC.interact("Attack");
+            while (Players.localPlayer().isInCombat()) {
+                sleep(Calculations.random(1000, 2000));
+            }
+        }
     }
 
     void smithTask() { //TODO
@@ -166,6 +196,7 @@ public class AIOaccounttrainer extends AbstractScript {
     }
 
     void woodcutTask() {
+        currentTask = "Woodcutting";
         if (!taskType) {
             Keyboard.type("Man, that was a long one. Let's relax with some lumberjacking.");
             taskType = true;
@@ -264,7 +295,7 @@ public class AIOaccounttrainer extends AbstractScript {
     } // Done
 
     void miningTask() {
-
+        currentTask = "Mining";
         if (!taskType) {
             Keyboard.type("Time for some digging!");
             taskType = true;
@@ -316,8 +347,9 @@ public class AIOaccounttrainer extends AbstractScript {
 
     void fishTask() {
         if (combatWeight < 30) { // Due to aggressive NPCs, if player is not high level enough go and level them up.
-            breakReq = true;
+            combatTask();
         }
+        currentTask = "Fishing";
         if (!taskType) {
             Keyboard.type("Time for some fishing, hopefully i'll catch a big one!");
         }
@@ -417,6 +449,7 @@ public class AIOaccounttrainer extends AbstractScript {
     }*/
     public int onLoop() {
 // Drink at pub for breaks. Swap randomly between tasks. USE F A C T O R Y  P A T T E R N its best prac.
+
         combatTask();
         return Calculations.random(500, 600);
     }
