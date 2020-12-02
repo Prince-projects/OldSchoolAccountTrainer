@@ -136,17 +136,16 @@ public class AIOaccounttrainer extends AbstractScript {
             if (GroundItems.closest(526).exists() && !Players.localPlayer().isInCombat()) {
                 GroundItems.closest(526).interact("Take");
             }
+
+        sleep(Calculations.random(1500, 2500)); // Delays to allow for game processing time.
+        frogNPC.interact("Attack");
+
+        while (Players.localPlayer().isInCombat()) {
+            sleep(Calculations.random(1000, 2000));
         }
+        sleep(1600);
 
-            sleep(Calculations.random(1500, 2500)); // Delays to allow for game processing time.
-            frogNPC.interact("Attack");
-
-            while (Players.localPlayer().isInCombat()) {
-                sleep(Calculations.random(1000, 2000));
-            }
-            sleep(1600);
-
-
+    }
         }//Done (Add cooking)
 
     void magicTask() {
