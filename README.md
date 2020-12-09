@@ -8,3 +8,4 @@ This is primarily an avenue to demonstrate coding experience. I need to add the 
 - Threading to create async program
 - Use of java timers.
 - Derived classes.
+- Move all methods into their own classes for org's sake.
