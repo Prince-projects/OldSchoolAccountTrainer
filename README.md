@@ -1,4 +1,5 @@
 # OldSchoolAccountTrainer
+**OUTDATED PROJECT - KEEPING AROUND FOR NOSTALGIA AND PROGRESS RECORDING**
 An AIO script for Dreambot. Created with the end goal of being capable of training a fresh f2p account to max given enough time.
 
 
@@ -9,3 +10,5 @@ This is primarily an avenue to demonstrate coding experience. I need to add the 
 - Use of java timers.
 - Derived classes.
 - Move all methods into their own classes for org's sake.
+
+
